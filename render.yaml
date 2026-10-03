@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: sop-dispatch
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: "true"
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: TEAM_PASSWORD
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true

@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dispatch SOP · Uncompromised</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b4532a'/%3E%3Cpath d='M9 12l7-4 7 4v8l-7 4-7-4z' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg:#f6f2ec; --card:#fff; --ink:#22201c; --muted:#6f685e; --line:#e4ddd2; --soft:#f1ebe2;
+    --brand:#b4532a; --brand-soft:#f7e6dc; --ok:#1f7a4d; --ok-soft:#e1f2e8; --warn:#9a6700; --warn-soft:#fdf2d6; --bad:#b42318; --bad-soft:#fde4e1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#171513; --card:#211f1c; --ink:#f1ece4; --muted:#a59d91; --line:#36322d; --soft:#2a2724;
+      --brand:#e07a4b; --brand-soft:#3a2a21; --ok:#5ccf93; --ok-soft:#1d3127; --warn:#f0c04a; --warn-soft:#3a3120; --bad:#ff8a7a; --bad-soft:#3d2421; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  button, input, select, textarea { font:inherit; color:inherit; }
+  header { position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line); }
+  .bar { max-width:1000px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .logo { font-weight:800; color:var(--brand); letter-spacing:-.02em; }
+  .logo small { color:var(--muted); font-weight:600; margin-left:6px; letter-spacing:0; }
+  .grow { flex:1; }
+  .who { color:var(--muted); font-size:14px; }
+  nav { max-width:1000px; margin:0 auto; padding:0 16px; display:flex; gap:4px; overflow-x:auto; }
+  nav button { background:none; border:0; border-bottom:2px solid transparent; padding:10px 12px; cursor:pointer; color:var(--muted); font-weight:600; white-space:nowrap; }
+  nav button.on { color:var(--ink); border-bottom-color:var(--brand); }
+  main { max-width:1000px; margin:0 auto; padding:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; }
+  h2 { font-size:18px; margin:0 0 4px; } h3 { font-size:15px; margin:0 0 8px; }
+  .muted { color:var(--muted); } .small { font-size:13px; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .btn { border:1px solid var(--line); background:var(--card); padding:8px 14px; border-radius:9px; cursor:pointer; font-weight:600; }
+  .btn.pri { background:var(--brand); color:#fff; border-color:var(--brand); }
+  .btn.danger { color:var(--bad); }
+  .btn:disabled { opacity:.55; cursor:not-allowed; }
+  input[type=text], input[type=number], input[type=date], select, textarea { border:1px solid var(--line); background:var(--card); border-radius:9px; padding:8px 10px; }
+  textarea { width:100%; min-height:70px; resize:vertical; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:700; }
+  .pill.ok { background:var(--ok-soft); color:var(--ok); } .pill.warn { background:var(--warn-soft); color:var(--warn); } .pill.bad { background:var(--bad-soft); color:var(--bad); } .pill.brand { background:var(--brand-soft); color:var(--brand); }
+  .progress { height:8px; background:var(--soft); border-radius:99px; overflow:hidden; } .progress > div { height:100%; background:var(--ok); transition:width .3s; }
+  .phase { margin-top:14px; } .phase-head { display:flex; align-items:baseline; gap:10px; margin-bottom:6px; }
+  .phase-head .time { font-weight:800; color:var(--brand); min-width:70px; }
+  .item { display:flex; gap:12px; padding:10px 8px; border-radius:10px; align-items:flex-start; cursor:pointer; }
+  .item:hover { background:var(--soft); }
+  .item input { width:20px; height:20px; margin-top:2px; accent-color:var(--ok); flex:none; cursor:pointer; }
+  .item .t { font-weight:600; } .item.done .t { color:var(--muted); text-decoration:line-through; }
+  .item .d { font-size:13px; color:var(--muted); } .item .by { font-size:12px; color:var(--ok); }
+  table { width:100%; border-collapse:collapse; } th, td { text-align:left; padding:8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  th { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  td input[type=number] { width:90px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  video { width:100%; border-radius:10px; background:#000; max-height:320px; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .stat { background:var(--soft); border-radius:12px; padding:12px; } .stat b { display:block; font-size:22px; }
+  .toast { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:10px; font-weight:600; opacity:0; transition:opacity .2s; pointer-events:none; z-index:20; max-width:90vw; }
+  .toast.show { opacity:1; }
+  .empty { text-align:center; color:var(--muted); padding:30px 10px; }
+  .hide { display:none !important; }
+  @media print { header, nav, .noprint { display:none !important; } body { background:#fff; color:#000; } .card { border:0; padding:0; } }
+  @media (max-width:600px) { th.hm, td.hm { display:none; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="logo">uncompromised.<small>Dispatch SOP</small></div>
+    <div class="grow"></div>
+    <input type="date" id="day" aria-label="Day">
+    <span class="who" id="who"></span>
+    <button class="btn" id="logout">Sign out</button>
+  </div>
+  <nav id="tabs">
+    <button data-tab="today" class="on">Today's flow</button>
+    <button data-tab="stock">Min–max stock</button>
+    <button data-tab="videos">Packing videos</button>
+    <button data-tab="report">Report</button>
+    <button data-tab="products">Products</button>
+  </nav>
+</header>
+<main>
+  <section id="tab-today"></section>
+  <section id="tab-stock" class="hide"></section>
+  <section id="tab-videos" class="hide"></section>
+  <section id="tab-report" class="hide"></section>
+  <section id="tab-products" class="hide"></section>
+</main>
+<div class="toast" id="toast"></div>
+<script src="/shim.js"></script>
+<script>
+"use strict";
+/* ------------------------------------------------------------------ *
+ * The SOP. Edit the steps here; everything else follows from it.      *
+ * ------------------------------------------------------------------ */
+const FLOW = [
+  { id: "cutoff", time: "7:00 PM", title: "Batch cut-off", items: [
+    { id: "pull", t: "Close the day's batch", d: "Orders placed up to 7 PM go in today's batch. Anything after 7 PM goes in tomorrow's batch." },
+    { id: "count", t: "Count today's orders on the Order Board", d: "Enter the number of orders below so the report is complete." },
+    { id: "ack", t: "Acknowledge every order in the batch", d: "Drag each card from Order to Acknowledged — oldest first (FIFO)." },
+  ]},
+  { id: "stock", time: "7:15 PM", title: "Stock check", items: [
+    { id: "minmax", t: "Do the min–max stock count", d: "Count every product in the Min–max stock tab. Anything below minimum is flagged for re-order." },
+    { id: "short", t: "Resolve shortages before packing", d: "If an ordered item is out of stock, inform the admin before packing that order." },
+  ]},
+  { id: "pick", time: "7:30 PM", title: "Pick", items: [
+    { id: "picklist", t: "Pick items order by order", d: "Check product, pack size and quantity against the order. One order at a time." },
+    { id: "quality", t: "Quality check every pack", d: "Seal intact, no leaks or damage, label readable, best-before date OK." },
+  ]},
+  { id: "pack", time: "8:00 PM", title: "Pack", items: [
+    { id: "video", t: "Record a packing video for each order", d: "Show the order number, every item going in, and the box being sealed. Upload it in Packing videos." },
+    { id: "box", t: "Pack in the right box", d: "Default box 30 × 20 × 20 cm. Fill gaps so nothing moves. Add the invoice / thank-you note." },
+    { id: "packed", t: "Move each order to Packed on the Order Board", d: "Confirm the box size. The weight is calculated and the customer gets the 'order packed' WhatsApp." },
+  ]},
+  { id: "ship", time: "8:45 PM", title: "Courier", items: [
+    { id: "book", t: "Book the courier for each packed order", d: "Pick the courier in the order's side panel (Amazon Shipping preferred) and click Book. The label downloads automatically." },
+    { id: "label", t: "Print and stick the labels", d: "Check the AWB and customer name on the label match the box before sticking." },
+    { id: "handover", t: "Keep parcels ready for pickup", d: "Stack booked parcels at the pickup point. Hand over to the courier and get the pickup confirmed." },
+  ]},
+  { id: "close", time: "9:30 PM", title: "Close the day", items: [
+    { id: "board", t: "Order Board is clean", d: "No order from today's batch is still in Order / Acknowledged / Packed without a reason noted below." },
+    { id: "area", t: "Packing area cleaned and stock put back", d: "" },
+    { id: "report", t: "Submit the completion report", d: "Add notes and issues, then press 'Complete the day'." },
+  ]},
+];
+const ALL_ITEMS = FLOW.flatMap((p) => p.items.map((i) => ({ ...i, phase: p.id })));
+
+/* ---------------- helpers ---------------- */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const todayStr = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+const fmtTime = (ms) => new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+const fmtDT = (ms) => new Date(ms).toLocaleString([], { day: "2-digit", month: "short", hour: "numeric", minute: "2-digit" });
+const fmtDay = (d) => new Date(d + "T00:00:00").toLocaleDateString([], { weekday: "long", day: "numeric", month: "short", year: "numeric" });
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("show"), 2600); }
+async function safe(fn, okMsg) { try { const r = await fn(); if (okMsg) toast(okMsg); return r; } catch (e) { toast(e.message || "Something went wrong"); throw e; } }
+
+const state = { me: null, day: todayStr(), tab: "today", products: [], log: null, stock: null };
+
+/* ---------------- data ---------------- */
+const emptyLog = () => ({ checks: {}, orders: null, notes: "", issues: "", closedBy: null, closedAt: null });
+async function loadDay() {
+  const [log, stock] = await Promise.all([SOP.get("daylog", state.day), SOP.get("stock", state.day)]);
+  state.log = Object.assign(emptyLog(), log || {});
+  state.stock = stock || { counts: {} };
+}
+async function loadProducts() {
+  state.products = (await SOP.list("products")).sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0) || a.name.localeCompare(b.name));
+}
+// Merge with the latest copy so two people ticking at once don't overwrite each other.
+async function saveLog(patch) {
+  const latest = Object.assign(emptyLog(), (await SOP.get("daylog", state.day)) || {});
+  const next = typeof patch === "function" ? patch(latest) : Object.assign(latest, patch);
+  await SOP.put("daylog", state.day, next);
+  state.log = next;
+}
+
+/* ---------------- Today's flow ---------------- */
+function renderToday() {
+  const L = state.log, done = ALL_ITEMS.filter((i) => L.checks[i.id]).length, pct = Math.round((done / ALL_ITEMS.length) * 100);
+  const closed = !!L.closedAt;
+  $("#tab-today").innerHTML = `
+    <div class="card">
+      <div class="row"><div class="grow"><h2>${esc(fmtDay(state.day))}</h2>
+        <div class="muted small">${done} of ${ALL_ITEMS.length} steps done${closed ? ` · completed by ${esc(L.closedBy)} at ${fmtTime(L.closedAt)}` : ""}</div></div>
+        ${closed ? '<span class="pill ok">Day completed</span>' : pct === 100 ? '<span class="pill brand">Ready to complete</span>' : '<span class="pill warn">In progress</span>'}
+      </div>
+      <div class="progress" style="margin-top:10px"><div style="width:${pct}%"></div></div>
+      <div class="row" style="margin-top:12px">
+        <label class="small" for="orders"><b>Orders in today's batch</b></label>
+        <input type="number" id="orders" min="0" step="1" style="width:100px" value="${L.orders ?? ""}" ${closed ? "disabled" : ""}>
+      </div>
+    </div>
+    ${FLOW.map((p) => `
+      <div class="card phase">
+        <div class="phase-head"><span class="time">${esc(p.time)}</span><h3>${esc(p.title)}</h3></div>
+        ${p.items.map((i) => { const c = L.checks[i.id]; return `
+          <label class="item ${c ? "done" : ""}">
+            <input type="checkbox" data-check="${i.id}" ${c ? "checked" : ""} ${closed ? "disabled" : ""}>
+            <div><div class="t">${esc(i.t)}</div>${i.d ? `<div class="d">${esc(i.d)}</div>` : ""}
+            ${c ? `<div class="by">✓ ${esc(c.by)} · ${fmtTime(c.at)}</div>` : ""}</div>
+          </label>`; }).join("")}
+      </div>`).join("")}
+    <div class="card">
+      <h3>Notes & issues</h3>
+      <label class="small muted" for="issues">Issues (shortages, damaged items, delayed orders, courier problems)</label>
+      <textarea id="issues" ${closed ? "disabled" : ""}>${esc(L.issues)}</textarea>
+      <label class="small muted" for="notes" style="display:block;margin-top:10px">Other notes</label>
+      <textarea id="notes" ${closed ? "disabled" : ""}>${esc(L.notes)}</textarea>
+      <div class="row" style="margin-top:12px">
+        ${closed
+          ? `<button class="btn" id="reopen">Reopen the day</button>`
+          : `<button class="btn" id="saveNotes">Save notes</button><button class="btn pri" id="close" ${pct < 100 ? "disabled" : ""}>Complete the day</button>
+             ${pct < 100 ? `<span class="small muted">Tick every step to complete the day.</span>` : ""}`}
+      </div>
+    </div>`;
+  $("#tab-today").querySelectorAll("[data-check]").forEach((cb) => cb.addEventListener("change", async () => {
+    const id = cb.dataset.check, on = cb.checked;
+    await safe(() => saveLog((l) => { if (on) l.checks[id] = { by: state.me.name, at: Date.now() }; else delete l.checks[id]; return l; }));
+    renderToday();
+  }));
+  const orders = $("#orders");
+  orders && orders.addEventListener("change", () => safe(() => saveLog({ orders: orders.value === "" ? null : Math.max(0, Math.round(+orders.value)) }), "Saved"));
+  const saveNotes = () => saveLog({ notes: $("#notes").value, issues: $("#issues").value });
+  $("#saveNotes") && ($("#saveNotes").onclick = () => safe(saveNotes, "Notes saved"));
+  $("#close") && ($("#close").onclick = async () => {
+    await safe(async () => { await saveNotes(); await saveLog({ closedBy: state.me.name, closedAt: Date.now() }); }, "Day completed — see the Report tab");
+    renderToday();
+  });
+  $("#reopen") && ($("#reopen").onclick = async () => {
+    if (!confirm("Reopen this day so steps can be changed?")) return;
+    await safe(() => saveLog({ closedBy: null, closedAt: null }), "Day reopened"); renderToday();
+  });
+}
+
+/* ---------------- Min–max stock ---------------- */
+function stockStatus(p, n) {
+  if (n === undefined || n === null || n === "") return { cls: "", label: "Not counted", reorder: 0 };
+  if (n < p.min) return { cls: "bad", label: n === 0 ? "Out of stock" : "Below min", reorder: Math.max(0, p.max - n) };
+  if (n > p.max) return { cls: "warn", label: "Above max", reorder: 0 };
+  return { cls: "ok", label: "OK", reorder: 0 };
+}
+function renderStock() {
+  const S = state.stock, P = state.products;
+  if (!P.length) { $("#tab-stock").innerHTML = `<div class="card empty">No products yet. Add them in the <b>Products</b> tab with their minimum and maximum stock.</div>`; return; }
+  const counted = P.filter((p) => S.counts[p.id] !== undefined).length;
+  const low = P.filter((p) => stockStatus(p, S.counts[p.id]).cls === "bad");
+  $("#tab-stock").innerHTML = `
+    <div class="card">
+      <div class="row"><div class="grow"><h2>Min–max stock check</h2>
+        <div class="muted small">${counted} of ${P.length} counted${S.by ? ` · last saved by ${esc(S.by)} at ${fmtTime(S.at)}` : ""}</div></div>
+        ${low.length ? `<span class="pill bad">${low.length} to re-order</span>` : counted === P.length ? '<span class="pill ok">All OK</span>' : ""}
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow-x:auto">
+      <table>
+        <thead><tr><th>Product</th><th class="hm">Min</th><th class="hm">Max</th><th>Count</th><th>Status</th><th>Re-order</th></tr></thead>
+        <tbody>${P.map((p) => { const n = S.counts[p.id], st = stockStatus(p, n); return `
+          <tr><td><b>${esc(p.name)}</b><div class="small muted">${esc(p.unit || "")}</div></td>
+          <td class="hm">${p.min}</td><td class="hm">${p.max}</td>
+          <td><input type="number" min="0" step="1" data-count="${p.id}" value="${n ?? ""}"></td>
+          <td>${st.cls ? `<span class="pill ${st.cls}">${st.label}</span>` : `<span class="small muted">${st.label}</span>`}</td>
+          <td>${st.reorder ? `<b>${st.reorder}</b>` : "—"}</td></tr>`; }).join("")}</tbody>
+      </table>
+    </div>
+    <div class="row noprint"><button class="btn pri" id="saveStock">Save count</button>
+      <span class="small muted">Re-order quantity = maximum − count, for anything below its minimum.</span></div>`;
+  $("#saveStock").onclick = async () => {
+    const counts = {};
+    $("#tab-stock").querySelectorAll("[data-count]").forEach((i) => { if (i.value !== "") counts[i.dataset.count] = Math.max(0, Math.round(+i.value)); });
+    const doc = { counts, by: state.me.name, at: Date.now() };
+    await safe(() => SOP.put("stock", state.day, doc), "Stock count saved");
+    state.stock = doc; renderStock();
+  };
+}
+
+/* ---------------- Packing videos ---------------- */
+async function renderVideos() {
+  const el = $("#tab-videos");
+  el.innerHTML = `<div class="card empty">Loading…</div>`;
+  const vids = (await SOP.list("videos")).filter((v) => v.date === state.day).sort((a, b) => b.at - a.at);
+  el.innerHTML = `
+    <div class="card noprint">
+      <h2>Packing videos</h2>
+      <p class="muted small" style="margin:0 0 10px">One short video per order: order number, every item, box sealed. MP4 or WebM, up to 20 MB.</p>
+      <div class="row">
+        <input type="text" id="vOrder" placeholder="Order no. e.g. 1042" style="width:170px">
+        <input type="text" id="vNote" placeholder="Note (optional)" style="flex:1;min-width:160px">
+        <input type="file" id="vFile" accept="video/mp4,video/webm" capture="environment">
+        <button class="btn pri" id="vUp">Upload</button>
+      </div>
+      <div class="small muted" id="vMsg" style="margin-top:6px"></div>
+    </div>
+    ${vids.length ? `<div class="grid">${vids.map((v) => `
+      <div class="card" style="margin:0">
+        <video src="${esc(v.url)}" controls preload="metadata" playsinline></video>
+        <div class="row" style="margin-top:8px"><div class="grow"><b>Order ${esc(v.orderNo || "—")}</b>
+          <div class="small muted">${esc(v.byName)} · ${fmtTime(v.at)} · ${(v.size / 1048576).toFixed(1)} MB</div>
+          ${v.note ? `<div class="small">${esc(v.note)}</div>` : ""}</div>
+          <button class="btn danger small noprint" data-delv="${v.id}">Delete</button></div>
+      </div>`).join("")}</div>` : `<div class="card empty">No packing videos for this day yet.</div>`}`;
+  $("#vUp").onclick = async () => {
+    const f = $("#vFile").files[0], order = $("#vOrder").value.trim().replace(/^#/, "");
+    if (!order) return toast("Enter the order number first");
+    if (!f) return toast("Choose a video");
+    if (!/^video\/(mp4|webm)$/.test(f.type)) return toast("Only MP4 or WebM videos");
+    if (f.size > 20 * 1048576) return toast("Video is over 20 MB — record a shorter clip");
+    const btn = $("#vUp"); btn.disabled = true; $("#vMsg").textContent = "Uploading " + (f.size / 1048576).toFixed(1) + " MB…";
+    try {
+      const up = await SOP.upload(f);
+      const id = SOP.uid();
+      await SOP.put("videos", id, { orderNo: order, note: $("#vNote").value.trim(), date: state.day, blobId: up.id, url: up.url, size: up.sizeBytes, type: up.contentType, by: state.me.id, byName: state.me.name, at: Date.now() });
+      toast("Video uploaded"); renderVideos();
+    } catch (e) { toast(e.message); btn.disabled = false; $("#vMsg").textContent = ""; }
+  };
+  el.querySelectorAll("[data-delv]").forEach((b) => (b.onclick = async () => {
+    if (!confirm("Delete this video?")) return;
+    const v = vids.find((x) => x.id === b.dataset.delv);
+    await safe(async () => { if (v.blobId) await SOP.deleteBlob(v.blobId); await SOP.del("videos", v.id); }, "Video deleted");
+    renderVideos();
+  }));
+}
+
+/* ---------------- Report ---------------- */
+async function renderReport() {
+  const el = $("#tab-report");
+  el.innerHTML = `<div class="card empty">Loading…</div>`;
+  const [logs, vids] = await Promise.all([SOP.list("daylog"), SOP.list("videos")]);
+  const L = state.log, S = state.stock, P = state.products;
+  const done = ALL_ITEMS.filter((i) => L.checks[i.id]);
+  const dayVids = vids.filter((v) => v.date === state.day);
+  const low = P.map((p) => ({ p, n: S.counts[p.id], st: stockStatus(p, S.counts[p.id]) })).filter((x) => x.st.cls === "bad");
+  const people = [...new Set(done.map((i) => L.checks[i.id].by))];
+  const videoCover = L.orders ? `${new Set(dayVids.map((v) => v.orderNo)).size} / ${L.orders}` : String(dayVids.length);
+  const history = logs.filter((l) => /^\d{4}-\d{2}-\d{2}$/.test(l.id)).sort((a, b) => b.id.localeCompare(a.id)).slice(0, 30);
+  el.innerHTML = `
+    <div class="card">
+      <div class="row"><div class="grow"><h2>Completion report</h2><div class="muted">${esc(fmtDay(state.day))}</div></div>
+        ${L.closedAt ? `<span class="pill ok">Completed by ${esc(L.closedBy)} · ${fmtTime(L.closedAt)}</span>` : '<span class="pill warn">Not completed</span>'}
+        <button class="btn noprint" onclick="print()">Print / PDF</button></div>
+      <div class="stats" style="margin-top:12px">
+        <div class="stat"><span class="small muted">Steps done</span><b>${done.length} / ${ALL_ITEMS.length}</b></div>
+        <div class="stat"><span class="small muted">Orders in batch</span><b>${L.orders ?? "—"}</b></div>
+        <div class="stat"><span class="small muted">Orders with video</span><b>${videoCover}</b></div>
+        <div class="stat"><span class="small muted">Items to re-order</span><b>${low.length}</b></div>
+      </div>
+      ${people.length ? `<p class="small muted" style="margin:12px 0 0">Team today: ${people.map(esc).join(", ")}</p>` : ""}
+    </div>
+    <div class="card"><h3>Steps</h3>
+      <table><tbody>${ALL_ITEMS.map((i) => { const c = L.checks[i.id]; return `<tr><td>${c ? "✅" : "⬜"}</td><td>${esc(i.t)}</td><td class="small muted">${c ? `${esc(c.by)} · ${fmtTime(c.at)}` : "Not done"}</td></tr>`; }).join("")}</tbody></table>
+    </div>
+    <div class="card"><h3>Stock to re-order</h3>
+      ${low.length ? `<table><thead><tr><th>Product</th><th>Count</th><th>Min</th><th>Re-order</th></tr></thead><tbody>
+        ${low.map((x) => `<tr><td>${esc(x.p.name)}</td><td>${x.n}</td><td>${x.p.min}</td><td><b>${x.st.reorder}</b> ${esc(x.p.unit || "")}</td></tr>`).join("")}</tbody></table>`
+        : `<div class="muted small">${Object.keys(S.counts).length ? "Nothing below minimum." : "Stock was not counted this day."}</div>`}
+    </div>
+    <div class="card"><h3>Issues</h3><div style="white-space:pre-wrap">${L.issues ? esc(L.issues) : '<span class="muted small">None reported.</span>'}</div>
+      ${L.notes ? `<h3 style="margin-top:12px">Notes</h3><div style="white-space:pre-wrap">${esc(L.notes)}</div>` : ""}</div>
+    <div class="card noprint"><h3>Past days</h3>
+      ${history.length ? `<table><thead><tr><th>Day</th><th>Steps</th><th>Orders</th><th>Status</th></tr></thead><tbody>
+        ${history.map((h) => { const n = ALL_ITEMS.filter((i) => h.checks && h.checks[i.id]).length; return `<tr style="cursor:pointer" data-goto="${h.id}"><td>${esc(fmtDay(h.id))}</td><td>${n} / ${ALL_ITEMS.length}</td><td>${h.orders ?? "—"}</td>
+          <td>${h.closedAt ? `<span class="pill ok">Completed · ${esc(h.closedBy)}</span>` : '<span class="pill warn">Open</span>'}</td></tr>`; }).join("")}</tbody></table>`
+        : `<div class="muted small">No days recorded yet.</div>`}
+    </div>`;
+  el.querySelectorAll("[data-goto]").forEach((r) => (r.onclick = () => setDay(r.dataset.goto)));
+}
+
+/* ---------------- Products ---------------- */
+function renderProducts() {
+  const P = state.products;
+  $("#tab-products").innerHTML = `
+    <div class="card"><h2>Products</h2>
+      <p class="muted small" style="margin:0 0 10px">The list used for the daily min–max count. Below its minimum, a product is flagged and the re-order quantity is maximum − count.</p>
+      <div class="row">
+        <input type="text" id="pName" placeholder="Product (e.g. Besan 1kg)" style="flex:1;min-width:180px">
+        <input type="text" id="pUnit" placeholder="Unit (packs)" style="width:120px">
+        <input type="number" id="pMin" placeholder="Min" min="0" style="width:90px">
+        <input type="number" id="pMax" placeholder="Max" min="0" style="width:90px">
+        <button class="btn pri" id="pAdd">Add</button>
+      </div>
+    </div>
+    ${P.length ? `<div class="card" style="padding:0;overflow-x:auto"><table>
+      <thead><tr><th>Product</th><th>Unit</th><th>Min</th><th>Max</th><th></th></tr></thead>
+      <tbody>${P.map((p) => `<tr>
+        <td><input type="text" value="${esc(p.name)}" data-f="name" data-id="${p.id}" style="width:100%"></td>
+        <td><input type="text" value="${esc(p.unit || "")}" data-f="unit" data-id="${p.id}" style="width:100px"></td>
+        <td><input type="number" min="0" value="${p.min}" data-f="min" data-id="${p.id}"></td>
+        <td><input type="number" min="0" value="${p.max}" data-f="max" data-id="${p.id}"></td>
+        <td><button class="btn danger" data-delp="${p.id}">Remove</button></td></tr>`).join("")}</tbody></table></div>`
+      : `<div class="card empty">No products yet — add the first one above.</div>`}`;
+  $("#pAdd").onclick = async () => {
+    const name = $("#pName").value.trim(), min = Math.max(0, Math.round(+$("#pMin").value || 0)), max = Math.max(0, Math.round(+$("#pMax").value || 0));
+    if (!name) return toast("Enter a product name");
+    if (max < min) return toast("Max must be at least the min");
+    const id = "p_" + SOP.uid();
+    await safe(() => SOP.put("products", id, { name, unit: $("#pUnit").value.trim(), min, max, sort: P.length }), "Product added");
+    await loadProducts(); renderProducts();
+  };
+  $("#tab-products").querySelectorAll("[data-f]").forEach((inp) => inp.addEventListener("change", async () => {
+    const p = P.find((x) => x.id === inp.dataset.id); if (!p) return;
+    const f = inp.dataset.f, v = f === "min" || f === "max" ? Math.max(0, Math.round(+inp.value || 0)) : inp.value.trim();
+    if (f === "name" && !v) { inp.value = p.name; return toast("Name can't be empty"); }
+    const next = { ...p, [f]: v }; delete next.id;
+    if (next.max < next.min) { inp.value = p[f]; return toast("Max must be at least the min"); }
+    await safe(() => SOP.put("products", p.id, next), "Saved");
+    Object.assign(p, { [f]: v });
+  }));
+  $("#tab-products").querySelectorAll("[data-delp]").forEach((b) => (b.onclick = async () => {
+    const p = P.find((x) => x.id === b.dataset.delp);
+    if (!confirm(`Remove ${p.name}?`)) return;
+    await safe(() => SOP.del("products", p.id), "Removed"); await loadProducts(); renderProducts();
+  }));
+}
+
+/* ---------------- shell ---------------- */
+const RENDER = { today: renderToday, stock: renderStock, videos: renderVideos, report: renderReport, products: renderProducts };
+function show(tab) {
+  state.tab = tab;
+  document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === tab));
+  Object.keys(RENDER).forEach((t) => $("#tab-" + t).classList.toggle("hide", t !== tab));
+  try { localStorage.setItem("sop_tab", tab); } catch {}
+  return RENDER[tab]();
+}
+async function setDay(d) {
+  state.day = d; $("#day").value = d;
+  await safe(loadDay); show(state.tab); window.scrollTo(0, 0);
+}
+(async function init() {
+  try {
+    state.me = await SOP.me();
+    $("#who").textContent = state.me.name;
+    $("#day").value = state.day; $("#day").max = todayStr();
+    await Promise.all([loadDay(), loadProducts()]);
+    let tab = "today"; try { tab = localStorage.getItem("sop_tab") || "today"; } catch {}
+    show(RENDER[tab] ? tab : "today");
+  } catch (e) { $("#tab-today").innerHTML = `<div class="card empty">Could not load: ${esc(e.message)}</div>`; }
+  document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => show(b.dataset.tab)));
+  $("#day").onchange = (e) => e.target.value && setDay(e.target.value);
+  $("#logout").onclick = () => SOP.logout();
+  // Pick up teammates' ticks when coming back to the tab.
+  document.addEventListener("visibilitychange", async () => {
+    if (document.visibilityState !== "visible" || !state.me) return;
+    try { await loadDay(); if (state.tab === "today" || state.tab === "stock") RENDER[state.tab](); } catch {}
+  });
+})();
+</script>
+</body>
+</html>
